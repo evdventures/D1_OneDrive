@@ -32,9 +32,29 @@ jobs:
         run: |
           curl -L "https://onedrive.live.com/download?cid=CB13DF129A4A254C&resid=CB13DF129A4A254C%21seed0922bad0841f1ac4283202a612ad9&format=csv&sheet=Rookie" -o Rookie.csv
 
-      - name: Fetch Prep CSV from OneDrive
+            - name: Fetch OneDrive Workbook (.xlsx)
         run: |
-          curl -L "https://onedrive.live.com/download?cid=CB13DF129A4A254C&resid=CB13DF129A4A254C%21seed0922bad0841f1ac4283202a612ad9&format=csv&sheet=Prep" -o Prep.csv
+          curl -L "https://onedrive.live.com/download?cid=CB13DF129A4A254C&resid=CB13DF129A4A254C!seed0922bad0841f1ac4283202a612ad9" -o workbook.xlsx
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+
+      - name: Install dependencies
+        run: |
+          pip install pandas openpyxl
+
+      - name: Extract sheets to CSV
+        run: |
+          python - << 'EOF'
+import pandas as pd
+xls = pd.ExcelFile('workbook.xlsx')
+sheets = ['Schedule','Adult','Devo','Rookie','Prep']
+for sheet in sheets:
+    df = pd.read_excel(xls, sheet_name=sheet)
+    df.to_csv(f"{sheet}.csv", index=False)
+EOF
 
       - name: Configure remote to use token
         run: |
