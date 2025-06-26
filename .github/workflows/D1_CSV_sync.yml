@@ -1,0 +1,44 @@
+name: Sync OneDrive CSVs
+
+on:
+  schedule:
+    - cron: '*/1 * * * *'      # every minute
+  workflow_dispatch:        # manual trigger in GitHub UI
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Fetch Schedule CSV from OneDrive
+        run: |
+          curl -L "https://onedrive.live.com/download?cid=CB13DF129A4A254C&resid=CB13DF129A4A254C%21seed0922bad0841f1ac4283202a612ad9&format=csv&sheet=Schedule" -o Schedule.csv
+
+      - name: Fetch Adult CSV from OneDrive
+        run: |
+          curl -L "https://onedrive.live.com/download?cid=CB13DF129A4A254C&resid=CB13DF129A4A254C%21seed0922bad0841f1ac4283202a612ad9&format=csv&sheet=Adult" -o Adult.csv
+
+      - name: Fetch Devo CSV from OneDrive
+        run: |
+          curl -L "https://onedrive.live.com/download?cid=CB13DF129A4A254C&resid=CB13DF129A4A254C%21seed0922bad0841f1ac4283202a612ad9&format=csv&sheet=Devo" -o Devo.csv
+
+      - name: Fetch Rookie CSV from OneDrive
+        run: |
+          curl -L "https://onedrive.live.com/download?cid=CB13DF129A4A254C&resid=CB13DF129A4A254C%21seed0922bad0841f1ac4283202a612ad9&format=csv&sheet=Rookie" -o Rookie.csv
+
+      - name: Fetch Prep CSV from OneDrive
+        run: |
+          curl -L "https://onedrive.live.com/download?cid=CB13DF129A4A254C&resid=CB13DF129A4A254C%21seed0922bad0841f1ac4283202a612ad9&format=csv&sheet=Prep" -o Prep.csv
+
+      - name: Commit and push changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add Schedule.csv Adult.csv Devo.csv Rookie.csv Prep.csv
+          git commit -m "Sync CSVs from OneDrive"
+          git push
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
