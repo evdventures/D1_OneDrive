@@ -12,6 +12,9 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0         # fetch full history for proper diff
+          persist-credentials: true  # allow Git push back to repo
 
       - name: Fetch Schedule CSV from OneDrive
         run: |
@@ -38,7 +41,12 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add Schedule.csv Adult.csv Devo.csv Rookie.csv Prep.csv
-          git commit -m "Sync CSVs from OneDrive"
-          git push
+          # Only commit if there are changes
+          if ! git diff --cached --quiet; then
+            git commit -m "Sync CSVs from OneDrive"
+            git push
+          else
+            echo "No changes to commit"
+          fi
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
